@@ -37,6 +37,7 @@ forge test
 | `OracleCheck` | Spot price reads (manipulable), missing TWAP, single-source oracles |
 | `UpgradeCheck` | Storage layout collisions in proxies, uninitialized implementation contracts |
 | `FlashLoanCheck` | Functions vulnerable to flash-loan-powered price/state manipulation |
+| `ERC4626Check` | First depositor attack, share price manipulation, rounding consistency, preview accuracy |
 
 ## Architecture
 
