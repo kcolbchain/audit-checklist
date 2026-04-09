@@ -87,26 +87,6 @@ forge test --match-contract Example -vvv
 
 This runs all checks against the intentionally vulnerable demo contract, showing what each test catches.
 
-## Quick start
-
-```bash
-forge install kcolbchain/audit-checklist
-```
-
-```solidity
-import {ReentrancyCheck} from "audit-checklist/checks/ReentrancyCheck.sol";
-
-contract MyVaultAudit is ReentrancyCheck {
-    function setUp() public {
-        targetContract = address(new MyVault());
-    }
-}
-```
-
-```bash
-forge test
-```
-
 ## Vulnerability classes covered
 
 | Check | What it detects |
