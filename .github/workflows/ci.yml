@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive # Required for Foundry's `lib` dependencies
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: latest
+
+      - name: Cache Foundry Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.forge/
+            ~/.cargo/bin/
+          key: ${{ runner.os }}-foundry-${{ hashFiles('**/foundry.toml', '**/remappings.txt') }}
+
+      - name: Install Project Dependencies
+        run: forge install
+
+      - name: Run Foundry Tests
+        run: forge test -vvv
+
+      - name: Install Slither
+        run: pip install slither-analyzer
+
+      - name: Run Slither Static Analysis
+        # The `--detectors-path detectors` argument points Slither to our custom detectors directory.
+        # `--exclude-detectors` can be adjusted based on desired analysis scope and noise reduction.
+        run: slither . --detectors-path detectors --exclude-detectors variable-scope,external-function
