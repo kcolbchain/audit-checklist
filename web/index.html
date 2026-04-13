@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>audit-checklist — vulnerability check explorer</title>
+<meta name="description" content="Executable smart-contract audit checks. Browse each check, its detection logic, required hooks, and the real bug it catches. By kcolbchain." />
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #13161b;
+    --panel-2: #0f1216;
+    --border: #23272f;
+    --fg: #e7e9ee;
+    --muted: #8a93a3;
+    --accent: #a78bfa;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    --hot: #f87171;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  header { padding: 22px 32px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:12px; }
+  header h1 { margin:0; font-size: 20px; }
+  header h1 .dot { color: var(--accent); }
+  header p { margin:0; color: var(--muted); font-size: 13px; }
+  .layout { display:grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 70px); }
+  @media (max-width: 820px) { .layout { grid-template-columns: 1fr; } aside { border-right: 0 !important; border-bottom: 1px solid var(--border); } }
+  aside { border-right: 1px solid var(--border); background: var(--panel-2); padding: 20px 0; overflow-y: auto; }
+  aside h2 { margin: 0 0 8px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  aside ul { list-style: none; padding: 0; margin: 0 0 20px 0; }
+  aside li button {
+    display: flex; flex-direction: column; gap: 2px; text-align: left;
+    width: 100%; background: transparent; border: 0; color: var(--fg);
+    padding: 10px 20px; cursor: pointer; font: inherit;
+    border-left: 2px solid transparent;
+  }
+  aside li button:hover { background: #181c22; }
+  aside li button.active { background: #1a1f27; border-left-color: var(--accent); }
+  aside li button .name { font-weight: 600; }
+  aside li button .blurb { color: var(--muted); font-size: 12px; }
+  main { padding: 28px 36px 80px 36px; max-width: 920px; overflow-x: auto; }
+  main h2 { margin: 0 0 4px 0; font-size: 24px; letter-spacing: -0.01em; }
+  main .tag-row { display: flex; gap: 8px; margin: 6px 0 18px 0; flex-wrap: wrap; }
+  .tag { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #1f232b; color: var(--muted); }
+  .tag.sev-high { background: #2a1212; color: var(--hot); }
+  .tag.sev-med { background: #2a220e; color: var(--warn); }
+  .tag.sev-low { background: #0e2a1e; color: var(--ok); }
+  main h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 24px 0 8px 0; }
+  main p { margin: 0 0 10px 0; }
+  pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; margin: 0; }
+  code { font-family: var(--mono); font-size: 0.95em; background: #1a1e24; padding: 1px 5px; border-radius: 4px; }
+  pre code { background: transparent; padding: 0; }
+  .kw  { color: #c4b5fd; }
+  .str { color: #86efac; }
+  .com { color: var(--muted); font-style: italic; }
+  .typ { color: #7dd3fc; }
+  .fn  { color: #fbbf24; }
+  .hooks { display: grid; gap: 8px; }
+  .hooks .hook { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; align-items: start; }
+  .hooks .hook .sig { font-family: var(--mono); font-size: 12.5px; color: #fbbf24; white-space: nowrap; }
+  .hooks .hook .desc { color: var(--muted); font-size: 13px; }
+  .runbar { margin: 18px 0 6px 0; padding: 10px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; display:flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 10px; }
+  .runbar code { background: transparent; color: var(--ok); }
+  .bug-box { background: #1a1212; border: 1px solid #4a1f1f; border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .bug-box .bug-lbl { color: var(--hot); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  footer { border-top: 1px solid var(--border); padding: 20px 36px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>audit-checklist<span class="dot">.</span> <span style="color:var(--muted);font-weight:400">vulnerability check explorer</span></h1>
+    <p>Every check ships as a Foundry template. Pick one to see what it detects, the hooks you override, and the actual bug it flags in the shipped <code>VulnerableVault</code>.</p>
+  </div>
+  <div style="display:flex;gap:14px;align-items:center">
+    <a href="https://github.com/kcolbchain/audit-checklist">source</a>
+    <a href="https://docs.kcolbchain.com/audit-checklist/">docs</a>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <h2>Checks</h2>
+    <ul id="list"></ul>
+    <h2>Resources</h2>
+    <ul>
+      <li><button onclick="window.open('https://github.com/kcolbchain/audit-checklist/blob/main/src/examples/VulnerableVault.sol','_blank')"><span class="name">VulnerableVault.sol</span><span class="blurb">Demo contract with 4 real bugs</span></button></li>
+      <li><button onclick="window.open('https://github.com/kcolbchain/audit-checklist/blob/main/test/Example.t.sol','_blank')"><span class="name">Example.t.sol</span><span class="blurb">Full audit harness, every check wired up</span></button></li>
+      <li><button onclick="window.open('https://github.com/kcolbchain/audit-checklist/blob/main/README.md#your-first-audit--5-minute-tutorial','_blank')"><span class="name">5-min tutorial</span><span class="blurb">Install → first audit run</span></button></li>
+    </ul>
+  </aside>
+
+  <main id="detail"></main>
+</div>
+
+<footer>
+  This explorer is a static companion to the
+  <a href="https://github.com/kcolbchain/audit-checklist">audit-checklist</a> Foundry library. The checks themselves
+  live in <code>src/checks/</code>. If you spot a vulnerability pattern that isn't covered here, open an issue — each
+  new check becomes a permanent drop-in for future audits.
+</footer>
+
+<script>
+const CHECKS = [
+  {
+    id: 'reentrancy',
+    name: 'ReentrancyCheck',
+    blurb: 'Checks-effects-interactions violations',
+    severity: 'high',
+    file: 'ReentrancyCheck.sol',
+    detects: `Functions that make an external call before updating state. Classic drain pattern — an attacker's fallback re-enters the function while their balance is still in the mapping, draining the contract one recursive call at a time.`,
+    how: `The check deploys a malicious ERC-777-style receiver and a second honest depositor, performs two deposits, then calls your <code>getWithdrawCalldata()</code> from the attacker. If the contract's balance drops below the honest depositor's share, the check fails and names the exploit path.`,
+    hooks: [
+      ['function getWithdrawCalldata() returns (bytes)', 'The calldata that triggers the withdrawal / transfer under test.'],
+      ['function performDeposit(address, uint256)', 'How to seed a balance for a given depositor. Used to set up the pre-attack state.'],
+      ['function getDepositValue() returns (uint256)', 'Optional. Amount to deposit. Default: 1 ether.'],
+    ],
+    bug: {
+      title: 'VulnerableVault.withdraw() — BUG 2',
+      code: `<span class="kw">function</span> <span class="fn">withdraw</span>() <span class="kw">external</span> {
+    <span class="typ">uint256</span> bal = balances[msg.sender];
+    <span class="kw">require</span>(bal &gt; 0, <span class="str">"No balance"</span>);
+
+    <span class="com">// External call BEFORE state update — classic reentrancy</span>
+    (<span class="kw">bool</span> sent,) = msg.sender.call{value: bal}(<span class="str">""</span>);
+    <span class="kw">require</span>(sent, <span class="str">"Transfer failed"</span>);
+
+    balances[msg.sender] = 0; <span class="com">// Too late — attacker already re-entered</span>
+}`,
+    },
+  },
+  {
+    id: 'access-control',
+    name: 'AccessControlCheck',
+    blurb: 'Unprotected admin functions, unguarded initializers',
+    severity: 'high',
+    file: 'AccessControlCheck.sol',
+    detects: `Admin-only functions callable by any address. Includes the special case of initializers that can be re-called to seize ownership, and role checks that are missing from one of several privileged paths.`,
+    how: `For every calldata you list in <code>getAdminFunctions()</code>, the check invokes it from a non-privileged address (default <code>0xdead</code>) and asserts the call reverts. A passing admin function is a finding, not a success.`,
+    hooks: [
+      ['function getAdminFunctions() returns (bytes[])', 'Array of calldata for each admin-only function to test. Include every privileged path, not just the obvious ones.'],
+      ['function getNonAdminAddress() returns (address)', 'Optional. Address that should lack permission. Default: 0xdead.'],
+    ],
+    bug: {
+      title: 'VulnerableVault.emergencyWithdraw() — BUG 3',
+      code: `<span class="com">// BUG 3: Missing access control on admin function</span>
+<span class="kw">function</span> <span class="fn">emergencyWithdraw</span>(<span class="typ">address</span> to) <span class="kw">external</span> {
+    <span class="com">// Missing: require(msg.sender == owner)</span>
+    <span class="kw">payable</span>(to).transfer(<span class="kw">address</span>(this).balance);
+}`,
+    },
+  },
+  {
+    id: 'oracle',
+    name: 'OracleCheck',
+    blurb: 'Spot-price reads, missing TWAP, single-source oracles',
+    severity: 'high',
+    file: 'OracleCheck.sol',
+    detects: `Contracts that read a price once per transaction from a manipulable source (DEX spot, single-venue feed). Adversaries with flash-loan or large inventory can skew the source in the same block.`,
+    how: `Reads the price before your <code>manipulatePrice()</code> hook, applies the manipulation, reads again, then calls <code>restorePrice()</code>. If the post-manipulation price differs from the baseline by more than the allowed drift, the check fails.`,
+    hooks: [
+      ['function getPriceReadCalldata() returns (bytes)', 'The function to call for a price read.'],
+      ['function manipulatePrice()', 'How to move the underlying source (e.g. swap imbalanced liquidity into the pool).'],
+      ['function restorePrice()', 'Undo the manipulation so unrelated tests are not poisoned.'],
+    ],
+    bug: {
+      title: 'VulnerableVault.getPrice() — BUG 4',
+      code: `<span class="com">// BUG 4: Spot price — manipulable in a single transaction</span>
+<span class="kw">function</span> <span class="fn">getPrice</span>() <span class="kw">external view returns</span> (<span class="typ">uint256</span>) {
+    <span class="com">// Proxy for a DEX spot read — attacker can push the pool, query, revert.</span>
+    <span class="kw">return</span> <span class="kw">address</span>(this).balance;
+}`,
+    },
+  },
+  {
+    id: 'upgrade',
+    name: 'UpgradeCheck',
+    blurb: 'Storage collisions, uninitialized implementations',
+    severity: 'med',
+    file: 'UpgradeCheck.sol',
+    detects: `EIP-1967 proxies where the implementation contract is left uninitialized (takeover risk), or where a new implementation reorders / inserts storage variables, corrupting state after upgrade.`,
+    how: `Reads the EIP-1967 implementation + admin slots directly via <code>vm.load</code>, calls <code>initialize()</code> on the raw implementation, and compares storage layout between old and new implementations using a snapshot of all used slots.`,
+    hooks: [
+      ['function getProxyAddress() returns (address)', 'The deployed proxy.'],
+      ['function getImplementationAddress() returns (address)', 'The current logic contract.'],
+    ],
+    bug: {
+      title: 'VulnerableVault.initialize() — BUG 1',
+      code: `<span class="com">// BUG 1: no constructor protection — anyone can re-initialize()</span>
+<span class="kw">function</span> <span class="fn">initialize</span>() <span class="kw">external</span> {
+    <span class="com">// Missing: require(!initialized)</span>
+    owner = msg.sender;
+    initialized = <span class="kw">true</span>;
+}`,
+    },
+  },
+  {
+    id: 'flash-loan',
+    name: 'FlashLoanCheck',
+    blurb: 'Functions vulnerable to atomic flash-loan attacks',
+    severity: 'high',
+    file: 'FlashLoanCheck.sol',
+    detects: `Critical state changes (liquidations, votes, rebases) that can be triggered by an attacker who holds the collateral only long enough for a single tx — via <code>flashLoan(...)</code>. If the protocol's invariants depend on sustained balance, they are broken by flash loans.`,
+    how: `Simulates a flash loan via <code>simulateFlashLoan(recipient, amount)</code>, invokes <code>getCriticalActionCalldata()</code> inside the same call frame, and asserts the post-action state matches the "no loan" reference trace.`,
+    hooks: [
+      ['function getCriticalActionCalldata() returns (bytes)', 'The action whose invariants you want to check (borrow, liquidate, vote, bridge).'],
+      ['function simulateFlashLoan(address, uint256)', 'Credit the attacker with the loan. Default size 10_000 ether; override getFlashLoanAmount() to change.'],
+    ],
+    bug: {
+      title: 'Cross-check: getPrice() + borrow()',
+      code: `<span class="com">// Chains BUG 4 with an attacker-controlled amount:</span>
+<span class="com">// 1. simulateFlashLoan(attacker, 10_000 ether)</span>
+<span class="com">// 2. push balance -&gt; inflate VulnerableVault.getPrice()</span>
+<span class="com">// 3. borrow against the inflated collateral</span>
+<span class="com">// 4. repay loan, keep borrowed proceeds</span>`,
+    },
+  },
+  {
+    id: 'vault',
+    name: 'VaultCheck',
+    blurb: 'ERC-4626 inflation attacks, share/asset drift',
+    severity: 'med',
+    file: 'VaultCheck.sol',
+    detects: `Classic ERC-4626 inflation (first-depositor) attack and conversion-math drift under donated assets. Asserts <code>convertToShares(convertToAssets(x)) == x</code> within the vault's documented rounding, and that a 1-wei first deposit cannot be frontrun into zero-share wipeouts.`,
+    how: `Deploys the vault, donates assets before the first deposit, and checks (a) the first real depositor still receives non-zero shares and (b) <code>previewDeposit</code> / <code>previewRedeem</code> match the actual <code>deposit</code> / <code>redeem</code> outputs after the donation.`,
+    hooks: [
+      ['function getVaultAddress() returns (address)', 'The ERC-4626 vault under test.'],
+      ['function getDonationAmount() returns (uint256)', 'Optional. How much to donate pre-deposit. Default: 1000 * 10**asset.decimals.'],
+    ],
+    bug: {
+      title: 'No direct bug in VulnerableVault (not 4626)',
+      code: `<span class="com">// VulnerableVault is not an ERC-4626 vault, so this check</span>
+<span class="com">// is exercised in docs against openzeppelin-audited-ERC4626-</span>
+<span class="com">// based templates. Run forge test --match-contract VaultAudit</span>
+<span class="com">// in your own harness.</span>`,
+    },
+  },
+];
+
+function render(id) {
+  const c = CHECKS.find(x => x.id === id) || CHECKS[0];
+  document.querySelectorAll('aside li button').forEach(b => b.classList.toggle('active', b.dataset.id === c.id));
+  const sevCls = c.severity === 'high' ? 'sev-high' : c.severity === 'med' ? 'sev-med' : 'sev-low';
+  const sevLbl = c.severity === 'high' ? 'high severity' : c.severity === 'med' ? 'medium' : 'low';
+
+  document.getElementById('detail').innerHTML = `
+    <h2>${c.name}</h2>
+    <div class="tag-row">
+      <span class="tag ${sevCls}">${sevLbl}</span>
+      <span class="tag">src/checks/${c.file}</span>
+      <span class="tag">abstract contract</span>
+    </div>
+
+    <h3>What it detects</h3>
+    <p>${c.detects}</p>
+
+    <h3>How the check runs</h3>
+    <p>${c.how}</p>
+
+    <h3>Hooks you implement</h3>
+    <div class="hooks">
+      ${c.hooks.map(([sig, desc]) => `<div class="hook"><span class="sig">${sig.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span><span class="desc">${desc}</span></div>`).join('')}
+    </div>
+
+    <h3>Bug it flags in <code>VulnerableVault</code></h3>
+    <div class="bug-box">
+      <div class="bug-lbl">⚠ ${c.bug.title}</div>
+      <pre><code>${c.bug.code}</code></pre>
+    </div>
+
+    <div class="runbar">
+      <span>Run just this check against the shipped demo:</span>
+      <code>forge test --match-contract Example${c.name.replace('Check','')}Audit -vvv</code>
+    </div>
+
+    <h3>Source</h3>
+    <p><a href="https://github.com/kcolbchain/audit-checklist/blob/main/src/checks/${c.file}" target="_blank">View ${c.file} on GitHub →</a></p>
+  `;
+  history.replaceState(null, '', '#' + c.id);
+}
+
+// sidebar
+document.getElementById('list').innerHTML = CHECKS.map(c => `
+  <li><button data-id="${c.id}" onclick="render('${c.id}')">
+    <span class="name">${c.name}</span>
+    <span class="blurb">${c.blurb}</span>
+  </button></li>`).join('');
+
+render(location.hash.slice(1) || CHECKS[0].id);
+</script>
+</body>
+</html>
