@@ -144,6 +144,13 @@ forge test --match-contract Example -vvv
 
 This runs all checks against the intentionally vulnerable demo contract, showing what each test catches.
 
+## Browse the checks in your browser
+
+An interactive explorer lives in [`web/`](web/) — one page per check with
+detection logic, required hooks, and the real bug it flags in
+`VulnerableVault`. Run it locally with `python3 -m http.server -d web 8080`
+or open [`web/index.html`](web/index.html) directly.
+
 ## Vulnerability classes covered
 
 | Check | What it detects |
