@@ -1,0 +1,11 @@
+{
+  "detectors_to_exclude": "assembly,shadowing-state",
+  "filter_paths": "lib/,test/",
+  "detectors_to_run": [
+    "custom-reentrancy-detector",
+    "custom-access-control-detector",
+    "custom-oracle-manipulation-detector",
+    "custom-flash-loan-detector",
+    "custom-governance-detector"
+  ]
+}
