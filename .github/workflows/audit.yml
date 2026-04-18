@@ -1,0 +1,80 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  foundry-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Build contracts
+        run: forge build
+
+      - name: Run audit tests
+        run: forge test -vvv
+
+  slither-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install Slither
+        run: pip install slither-analyzer
+
+      - name: Run Slither with custom detectors
+        run: |
+          slither . \
+            --config slither.config.json \
+            --python-path slither/detectors \
+            --exclude-assembly \
+            --exclude-shadowing \
+            --exclude-low \
+            --exclude-informational \
+            --sarif output.sarif || true
+
+      - name: Upload Slither results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: output.sarif
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f output.sarif ]; then
+            echo "## Slither Analysis Results" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            python3 -c "
+          import json
+          with open('output.sarif') as f:
+              data = json.load(f)
+          results = data.get('runs', [{}])[0].get('results', [])
+          print(f'Found {len(results)} potential issues')
+          for r in results[:20]:
+              msg = r.get('message', {}).get('text', '')[:80]
+              level = r.get('level', 'unknown')
+              print(f'  [{level.upper()}] {msg}')
+          " >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No Slither results found" >> $GITHUB_STEP_SUMMARY
+          fi
