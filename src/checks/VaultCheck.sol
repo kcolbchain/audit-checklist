@@ -20,7 +20,11 @@ interface IERC4626 {
     function maxDeposit(address receiver) external view returns (uint256);
 }
 
-interface IERC20 {
+// Minimal IERC20 used by VaultCheck & ERC4626AdvancedCheck. Named `IERC20Minimal`
+// so it does not collide with OpenZeppelin's `IERC20` when a test imports both
+// this file and an OZ-based vault (e.g. `VulnerableERC4626.sol`) into the same
+// compilation unit.
+interface IERC20Minimal {
     function approve(address spender, uint256 amount) external returns (bool);
     function transfer(address to, uint256 amount) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
@@ -58,7 +62,7 @@ abstract contract VaultCheck is ChecklistBase {
         address attacker = makeAddr("inflation_attacker");
         address victim   = makeAddr("inflation_victim");
 
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint8  dec        = underlying.decimals();
         uint256 smallDep  = getSmallDepositAmount();
         uint256 donation  = 10 ** (dec + 3); // 1000 tokens worth of underlying
@@ -106,7 +110,7 @@ abstract contract VaultCheck is ChecklistBase {
         address alice    = makeAddr("alice");
         address attacker = makeAddr("donate_attacker");
 
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 aliceDeposit    = getLargeDepositAmount();
         uint256 attackerDeposit = getLargeDepositAmount();
         uint256 donationAmount  = getLargeDepositAmount();
@@ -178,7 +182,7 @@ abstract contract VaultCheck is ChecklistBase {
     // -------------------------------------------------------------------------
     function test_preview_deposit_accuracy() public {
         address user = makeAddr("preview_user");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getLargeDepositAmount();
 
         deal(address(underlying), user, amount);
@@ -202,7 +206,7 @@ abstract contract VaultCheck is ChecklistBase {
 
     function test_preview_redeem_accuracy() public {
         address user = makeAddr("redeem_user");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getLargeDepositAmount();
 
         deal(address(underlying), user, amount);

@@ -18,7 +18,7 @@ abstract contract ERC4626AdvancedCheck is VaultCheck {
     // -------------------------------------------------------------------------
     function test_flash_deposit_withdraw_no_leak() public {
         address attacker = makeAddr("flash_attacker");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getLargeDepositAmount();
 
         deal(address(underlying), attacker, amount);
@@ -63,7 +63,7 @@ abstract contract ERC4626AdvancedCheck is VaultCheck {
     // -------------------------------------------------------------------------
     function test_round_trip_tolerance() public {
         address user = makeAddr("roundtrip_user");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getLargeDepositAmount();
 
         deal(address(underlying), user, amount);
@@ -95,7 +95,7 @@ abstract contract ERC4626AdvancedCheck is VaultCheck {
     // -------------------------------------------------------------------------
     function test_convert_roundtrip() public {
         address user = makeAddr("convert_user");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getLargeDepositAmount();
 
         deal(address(underlying), user, amount);
@@ -142,7 +142,7 @@ abstract contract ERC4626AdvancedCheck is VaultCheck {
         address alice = makeAddr("multi_alice");
         address bob = makeAddr("multi_bob");
         address carol = makeAddr("multi_carol");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getLargeDepositAmount();
 
         deal(address(underlying), alice, amount);
@@ -199,7 +199,7 @@ abstract contract ERC4626AdvancedCheck is VaultCheck {
     // -------------------------------------------------------------------------
     function test_deposit_into_empty_vault() public {
         address user = makeAddr("empty_vault_user");
-        IERC20 underlying = IERC20(vault.asset());
+        IERC20Minimal underlying = IERC20Minimal(vault.asset());
         uint256 amount = getSmallDepositAmount();
 
         deal(address(underlying), user, amount);
