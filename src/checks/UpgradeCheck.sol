@@ -24,7 +24,7 @@ abstract contract UpgradeCheck is ChecklistBase {
         bytes32 implSlotValue = vm.load(proxy, IMPL_SLOT);
         address storedImpl = address(uint160(uint256(implSlotValue)));
 
-        assertTrue(storedImpl != address(0), "VULNERABILITY: Implementation slot is zero — proxy not initialized");
+        assertTrue(storedImpl != address(0), unicode"VULNERABILITY: Implementation slot is zero — proxy not initialized");
         assertEq(storedImpl, getImplementationAddress(), "Implementation slot doesn't match expected");
     }
 

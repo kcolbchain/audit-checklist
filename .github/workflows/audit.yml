@@ -40,15 +40,13 @@ jobs:
       - name: Install Slither
         run: pip install slither-analyzer
 
-      - name: Run Slither with custom detectors
+      - name: Run Slither
+        # Excludes + severity filters live in slither.config.json.
+        # Custom detectors in slither/detectors/ are not yet wired up as a
+        # pip-installable plugin — see slither/README.md for the follow-up.
         run: |
           slither . \
             --config slither.config.json \
-            --python-path slither/detectors \
-            --exclude-assembly \
-            --exclude-shadowing \
-            --exclude-low \
-            --exclude-informational \
             --sarif output.sarif || true
 
       - name: Upload Slither results

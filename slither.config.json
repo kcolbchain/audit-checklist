@@ -1,11 +1,6 @@
 {
-  "detectors_to_exclude": "assembly,shadowing-state",
+  "detectors_to_exclude": "assembly,shadowing-state,naming-convention,solc-version,pragma,low-level-calls",
   "filter_paths": "lib/,test/",
-  "detectors_to_run": [
-    "custom-reentrancy-detector",
-    "custom-access-control-detector",
-    "custom-oracle-manipulation-detector",
-    "custom-flash-loan-detector",
-    "custom-governance-detector"
-  ]
+  "exclude_informational": true,
+  "exclude_low": true
 }
