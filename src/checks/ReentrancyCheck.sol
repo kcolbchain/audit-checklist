@@ -41,7 +41,7 @@ abstract contract ReentrancyCheck is ChecklistBase {
         uint256 attackerBal = address(attacker).balance;
         // If attacker got more than deposited, reentrancy succeeded
         if (attackerBal > depositAmount) {
-            emit log("VULNERABILITY: Reentrancy detected — attacker extracted more than deposited");
+            emit log(unicode"VULNERABILITY: Reentrancy detected — attacker extracted more than deposited");
             fail();
         }
     }
