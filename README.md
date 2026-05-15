@@ -129,7 +129,11 @@ import {AccessControlCheck} from "audit-checklist/checks/AccessControlCheck.sol"
 contract MyAudit is AccessControlCheck { ... }
 
 // Run all checks
-import {ReentrancyCheck, AccessControlCheck, OracleCheck, UpgradeCheck, FlashLoanCheck} from "audit-checklist/checks/ReentrancyCheck.sol";
+import {ReentrancyCheck} from "audit-checklist/checks/ReentrancyCheck.sol";
+import {AccessControlCheck} from "audit-checklist/checks/AccessControlCheck.sol";
+import {OracleCheck} from "audit-checklist/checks/OracleCheck.sol";
+import {UpgradeCheck} from "audit-checklist/checks/UpgradeCheck.sol";
+import {FlashLoanCheck} from "audit-checklist/checks/FlashLoanCheck.sol";
 contract MyAudit is ReentrancyCheck, AccessControlCheck, OracleCheck, UpgradeCheck, FlashLoanCheck { ... }
 ```
 
