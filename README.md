@@ -160,6 +160,7 @@ or open [`web/index.html`](web/index.html) directly.
 | `OracleCheck` | Spot price reads (manipulable), missing TWAP, single-source oracles |
 | `UpgradeCheck` | Storage layout collisions in proxies, uninitialized implementation contracts |
 | `FlashLoanCheck` | Functions vulnerable to flash-loan-powered price/state manipulation |
+| `ERC777ReentrancyCheck` | ERC-777 `tokensReceived` reentrancy (2020 imBTC/Uniswap V1 class) |
 
 ## Architecture
 
@@ -172,6 +173,7 @@ src/
 │   ├── OracleCheck.sol      — Oracle manipulation checks
 │   ├── UpgradeCheck.sol     — Proxy upgrade safety
 │   └── FlashLoanCheck.sol   — Flash loan resistance
+│   └── ERC777ReentrancyCheck.sol — ERC-777 reentrancy checks
 ├── examples/
 │   └── VulnerableVault.sol  — Intentionally vulnerable demo contract
 test/
