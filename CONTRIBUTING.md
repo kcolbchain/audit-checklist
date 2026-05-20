@@ -10,6 +10,10 @@ Thanks for your interest in contributing! kcolbchain is an open blockchain resea
 4. Submit a PR referencing the issue number
 5. Get reviewed within 48 hours
 
+For starter examples, run `forge test --match-path test/FlashLoanPriceManip.t.sol -vvv`
+or `forge test --match-contract Example -vvv` and mirror the same focused
+fixture style in your PR.
+
 ## Contributor Tiers
 
 | PRs Merged | Tier | Access |

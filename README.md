@@ -148,6 +148,14 @@ forge test --match-contract Example -vvv
 
 This runs all checks against the intentionally vulnerable demo contract, showing what each test catches.
 
+For an end-to-end flash-loan price manipulation starter example, run:
+
+```bash
+forge test --match-path test/FlashLoanPriceManip.t.sol -vvv
+```
+
+That test demonstrates borrow -> spot-price swap -> vulnerable oracle read -> vault drain -> flash-loan repayment in one transaction.
+
 ## Browse the checks in your browser
 
 An interactive explorer lives in [`web/`](web/) — one page per check with
