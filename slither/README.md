@@ -11,6 +11,7 @@ Custom Slither static analysis detectors that mirror the Foundry test checks.
 | `custom-oracle-manipulation-detector` | Spot price without TWAP | High |
 | `custom-flash-loan-detector` | Atomic read-write on external state | High |
 | `custom-governance-detector` | Timelock bypass, parameter manipulation | High |
+| `custom-upgrade-gap` | Upgradeable storage variables appended after `__gap` | Medium |
 
 ## Usage
 
@@ -24,6 +25,15 @@ slither . --config slither.config.json
 ```bash
 slither . --detect custom-reentrancy-detector
 ```
+
+### Run the upgrade-gap detector tests
+```bash
+python3 -m unittest discover -s slither/tests -q
+```
+
+The upgrade-gap fixtures model the intended pattern:
+- `upgrade_gap_bad.sol` appends `newFeeBps` after `__gap` and should be flagged.
+- `upgrade_gap_good.sol` places `newFeeBps` before a shrunken gap and should be ignored.
 
 ### Run with SARIF output
 ```bash
