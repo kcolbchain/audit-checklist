@@ -160,6 +160,7 @@ or open [`web/index.html`](web/index.html) directly.
 | Check | What it detects |
 |-------|----------------|
 | `ReentrancyCheck` | Checks-effects-interactions violations, cross-function reentrancy via callbacks |
+| `ERC777ReentrancyCheck` | Reentrancy via `tokensReceived` recipient hook (imBTC / Uniswap V1 class, 2020) |
 | `AccessControlCheck` | Unprotected admin functions, unguarded initializers, missing role checks |
 | `OracleCheck` | Spot price reads (manipulable), missing TWAP, single-source oracles |
 | `UpgradeCheck` | Storage layout collisions in proxies, uninitialized implementation contracts |
@@ -172,6 +173,7 @@ src/
 ├── ChecklistBase.sol        — Base contract with shared test helpers
 ├── checks/
 │   ├── ReentrancyCheck.sol  — Reentrancy detection tests
+│   ├── ERC777ReentrancyCheck.sol — ERC-777 tokensReceived reentrancy
 │   ├── AccessControlCheck.sol — Access control verification
 │   ├── OracleCheck.sol      — Oracle manipulation checks
 │   ├── UpgradeCheck.sol     — Proxy upgrade safety
