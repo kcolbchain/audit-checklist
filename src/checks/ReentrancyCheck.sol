@@ -28,14 +28,13 @@ abstract contract ReentrancyCheck is ChecklistBase {
         vm.deal(attacker, depositAmount);
 
         // Deposit as the attacker
-        vm.prank(attacker);
+        // NOTE: performDeposit must handle msg.sender pranking internally.
         performDeposit(attacker, depositAmount);
 
         uint256 targetBalBefore = address(targetContract).balance;
 
         // Trigger the attack — attacker calls withdraw, which sends ETH,
         // which triggers receive(), which re-enters withdraw()
-        vm.prank(attacker);
         ReentrantAttacker(payable(attacker)).attack();
 
         uint256 attackerBal = address(attacker).balance;
