@@ -173,6 +173,7 @@ or open [`web/index.html`](web/index.html) directly.
 | `OracleCheck` | Spot price reads (manipulable), missing TWAP, single-source oracles |
 | `UpgradeCheck` | Storage layout collisions in proxies, uninitialized implementation contracts |
 | `FlashLoanCheck` | Functions vulnerable to flash-loan-powered price/state manipulation |
+| `ERC20ApprovalRaceCheck` | Unsafe ERC-20 allowance overwrites that enable approve front-running |
 
 ## Architecture
 
@@ -191,6 +192,10 @@ src/
 test/
 └── Example.t.sol            — Full example audit against VulnerableVault
 ```
+
+The ERC-20 approval race check includes `src/checks/ERC20ApprovalRaceCheck.sol`,
+`src/examples/VulnerableERC20Approval.sol`, `test/ERC20ApprovalRace.t.sol`, and
+the companion Slither heuristic in `slither/detectors/custom_erc20_approval_race.py`.
 
 ## License
 
