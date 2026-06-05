@@ -23,6 +23,28 @@ cd my-audit-project
 forge install kcolbchain/audit-checklist
 ```
 
+## Verify this repository
+
+When working on this repository directly, initialize submodules before running
+the local verification commands:
+
+```bash
+git submodule update --init --recursive
+forge build
+forge test -vvv --no-match-contract '^(Example|TestERC4626)'
+slither . --config slither.config.json --sarif output.sarif || true
+```
+
+The plain `forge test` command also executes demonstration suites wired to
+intentionally vulnerable contracts. Those tests are expected to fail because a
+failing audit check means the checklist detected the seeded bug. The
+`--no-match-contract` command above is the same clean pass/fail gate used by CI.
+
+Slither may exit non-zero when it finds issues in the intentionally vulnerable
+examples or reusable abstract checks. Treat the generated SARIF report as the
+analysis artifact and inspect whether findings are expected for the current
+change.
+
 ### Your First Audit — 5-minute tutorial
 
 This walks you end-to-end against a deliberately vulnerable contract that
