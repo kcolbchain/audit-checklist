@@ -173,6 +173,7 @@ or open [`web/index.html`](web/index.html) directly.
 | `OracleCheck` | Spot price reads (manipulable), missing TWAP, single-source oracles |
 | `UpgradeCheck` | Storage layout collisions in proxies, uninitialized implementation contracts |
 | `FlashLoanCheck` | Functions vulnerable to flash-loan-powered price/state manipulation |
+| `UncheckedCallCheck` | Ignored low-level `.call()` return values that hide failed external calls |
 
 ## Architecture
 
@@ -185,9 +186,11 @@ src/
 │   ├── AccessControlCheck.sol — Access control verification
 │   ├── OracleCheck.sol      — Oracle manipulation checks
 │   ├── UpgradeCheck.sol     — Proxy upgrade safety
-│   └── FlashLoanCheck.sol   — Flash loan resistance
+│   ├── FlashLoanCheck.sol   — Flash loan resistance
+│   └── UncheckedCallCheck.sol — Low-level call failure handling
 ├── examples/
-│   └── VulnerableVault.sol  — Intentionally vulnerable demo contract
+│   ├── VulnerableVault.sol  — Intentionally vulnerable demo contract
+│   └── UncheckedCallExamples.sol — Vulnerable/fixed low-level call examples
 test/
 └── Example.t.sol            — Full example audit against VulnerableVault
 ```
