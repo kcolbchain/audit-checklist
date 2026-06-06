@@ -173,6 +173,7 @@ or open [`web/index.html`](web/index.html) directly.
 | `OracleCheck` | Spot price reads (manipulable), missing TWAP, single-source oracles |
 | `UpgradeCheck` | Storage layout collisions in proxies, uninitialized implementation contracts |
 | `FlashLoanCheck` | Functions vulnerable to flash-loan-powered price/state manipulation |
+| `UncheckedLowLevelCallCheck` | Discarded `address.call()` success booleans that silently trap funds or hide failures |
 
 ## Architecture
 
