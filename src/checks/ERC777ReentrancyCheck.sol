@@ -29,6 +29,8 @@ abstract contract ERC777ReentrancyCheck is ChecklistBase {
 
     /// @dev Perform a deposit as `depositor` of `amount`. Override to match
     ///      your target's deposit flow (approve+pull, push, etc.).
+    /// @notice Implementations MUST use `vm.prank(depositor)` (or `vm.startPrank`/`vm.stopPrank`)
+    ///         before the deposit call so that the target contract sees `depositor` as `msg.sender`.
     function performDeposit(address depositor, uint256 amount) internal virtual;
 
     function test_erc777_reentrancy_on_withdraw() public {

@@ -28,6 +28,28 @@ forge install kcolbchain/audit-checklist
 When working on this repository directly, initialize submodules before running
 the local verification commands:
 
+### Prerequisites
+
+- **Foundry** (forge + cast): Install via [foundryup](https://book.getfoundry.sh/getting-started/installation).
+  - ⚠️ **Linux users**: The latest forge binaries require **GLIBC >= 2.33**.
+    Run `ldd --version` to check. If you're on an older distro (e.g. CentOS 8,
+    Ubuntu 20.04 with stock glibc), use the [Foundry Docker image](https://ghcr.io/foundry-rs/foundry):
+    ```bash
+    docker pull ghcr.io/foundry-rs/foundry:latest
+    docker run --rm -v "$PWD":/workspace -w /workspace ghcr.io/foundry-rs/foundry:latest forge test
+    ```
+- **Slither** (optional, for static analysis): `pip install slither-analyzer`
+  - Memory-constrained hosts can run specific detectors:
+    ```bash
+    slither . --config slither.config.json --detect reentrancy-eth,uninitialized-state,unchecked-transfer
+    ```
+  - Full analysis (may need 4 GB+ RAM):
+    ```bash
+    slither . --config slither.config.json
+    ```
+
+### Quick verification
+
 ```bash
 git submodule update --init --recursive
 forge build
