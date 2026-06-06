@@ -12,6 +12,7 @@ Custom Slither static analysis detectors that mirror the Foundry test checks.
 | `custom-oracle-manipulation-detector` | Medium | High | Spot price usage (`getPrice`, `latestPrice`, `spotPrice`) without TWAP, single-source oracle without fallback, price-dependent state changes on uncached values | ```solidity\nfunction getAmountOut(uint256 amountIn) public view returns (uint256) {\n    uint256 price = pair.getReserves()[0];      // spot price, no TWAP\n    return price * amountIn / 1e18;\n}\n\nfunction executeTrade() external {\n    uint256 price = getAmountOut(1000);          // reads spot → state change\n    // vulnerable to flash loan manipulation\n}\n``` | `slither . --detect custom-oracle-manipulation-detector` |
 | `custom-governance-detector` | Medium | High | `execute`/`propose` functions without timelock delay, governance parameter changes (`setFee`, `setDelay`, `updateThreshold`) without `onlyGovernance` modifier | ```solidity\nfunction execute(uint256 proposalId) external {\n    // no timelock check — executes immediately\n    targets[proposalId].call(calldata[proposalId]);\n}\n\nfunction setFee(uint256 newFee) external {       // public, no modifier\n    fee = newFee;                                 // critical param change\n}\n``` | `slither . --detect custom-governance-detector` |
 | `custom-upgrade-gap` | Medium | Medium | Upgradeable contracts that append storage variables after `__gap`, which can corrupt proxy storage layouts after upgrades | ```solidity\nuint256[49] private __gap;\nuint256 public newFeeBps; // appended after gap\n``` | `slither . --detect custom-upgrade-gap` |
+| `custom-erc20-approve-detector` | Medium | High | ERC-20 `approve()` lacking race condition mitigations (changing allowance from non-zero to non-zero without zeroing first) | ```solidity\nfunction approve(address spender, uint256 amount) public {\n    allowance[msg.sender][spender] = amount;\n}\n``` | `slither . --detect custom-erc20-approve-detector` |
 
 ## Usage
 
@@ -50,6 +51,7 @@ slither . --config slither.config.json --sarif output.sarif
 | `custom-oracle-manipulation-detector` | [`slither/detectors/custom_oracle.py`](slither/detectors/custom_oracle.py) |
 | `custom-governance-detector` | [`slither/detectors/custom_governance.py`](slither/detectors/custom_governance.py) |
 | `custom-upgrade-gap` | [`slither/detectors/custom_upgrade_gap.py`](slither/detectors/custom_upgrade_gap.py) |
+| `custom-erc20-approve-detector` | [`slither/detectors/custom_erc20_approve.py`](slither/detectors/custom_erc20_approve.py) |
 
 ## Confidence vs Impact
 
